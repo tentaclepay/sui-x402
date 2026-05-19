@@ -11,6 +11,7 @@
 		"protocol",
 		"sui"
 	],
+	"license": "Apache-2.0",
 	"description": "x402 Payment Protocol Sui Implementation",
 	"scripts": {
 		"build": "tsup",
