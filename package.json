@@ -1,46 +1,48 @@
 {
-	"$schema": "https://json.schemastore.org/package.json",
-	"name": "@tentaclepay/sui-x402",
-	"version": "2.1.0",
-	"main": "./dist/cjs/index.js",
-	"module": "./dist/esm/index.js",
-	"types": "./dist/cjs/index.d.ts",
-	"keywords": [
-		"x402",
-		"payment",
-		"protocol",
-		"sui"
-	],
-	"license": "Apache-2.0",
-	"description": "x402 Payment Protocol Sui Implementation",
-	"scripts": {
-		"build": "tsup",
-		"typecheck": "tsc --noEmit"
-	},
-	"exports": {
-		".": {
-			"import": {
-				"types": "./dist/esm/index.d.ts",
-				"default": "./dist/esm/index.js"
-			},
-			"require": {
-				"types": "./dist/cjs/index.d.ts",
-				"default": "./dist/cjs/index.js"
-			}
-		}
-	},
-	"files": [
-		"dist"
-	],
-	"devDependencies": {
-		"@biomejs/biome": "2.4.15",
-		"@total-typescript/ts-reset": "0.6.1",
-		"@tsconfig/node22": "22.0.5",
-		"@types/node": "25.9.0",
-		"tsup": "8.5.1",
-		"typescript": "5.9.3"
-	},
-	"dependencies": {
-		"@x402/core": "2.12.0"
-	}
+  "$schema": "https://json.schemastore.org/package.json",
+  "name": "@tentaclepay/sui-x402",
+  "version": "2.1.0",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/cjs/index.d.ts",
+  "keywords": [
+    "x402",
+    "payment",
+    "protocol",
+    "sui"
+  ],
+  "license": "Apache-2.0",
+  "description": "x402 Payment Protocol Sui Implementation",
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check .",
+    "lint-staged": "biome check . --write --staged --files-ignore-unknown=true --no-errors-on-unmatched"
+  },
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/esm/index.d.ts",
+        "default": "./dist/esm/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/index.d.ts",
+        "default": "./dist/cjs/index.js"
+      }
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "devDependencies": {
+    "@biomejs/biome": "2.4.15",
+    "@total-typescript/ts-reset": "0.6.1",
+    "@tsconfig/node22": "22.0.5",
+    "@types/node": "25.9.0",
+    "tsup": "8.5.1",
+    "typescript": "5.9.3"
+  },
+  "dependencies": {
+    "@x402/core": "2.12.0"
+  }
 }
