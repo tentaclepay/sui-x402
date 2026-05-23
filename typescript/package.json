@@ -11,6 +11,14 @@
     "protocol",
     "sui"
   ],
+  "homepage": "https://github.com/tentaclepay/sui-x402#readme",
+  "bugs": {
+    "url": "https://github.com/tentaclepay/sui-x402/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tentaclepay/sui-x402.git"
+  },
   "license": "Apache-2.0",
   "description": "x402 Payment Protocol Sui Implementation",
   "scripts": {
