@@ -16,6 +16,9 @@
   "scripts": {
     "build": "tsup",
     "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:integration": "vitest run --config vitest.integration.config.ts",
+    "test:watch": "vitest",
     "lint": "biome check .",
     "lint-staged": "biome check . --write --staged --files-ignore-unknown=true --no-errors-on-unmatched"
   },
@@ -40,9 +43,15 @@
     "@tsconfig/node22": "22.0.5",
     "@types/node": "25.9.0",
     "tsup": "8.5.1",
-    "typescript": "5.9.3"
+    "typescript": "5.9.3",
+    "vite-tsconfig-paths": "6.1.1",
+    "vitest": "4.1.7"
   },
   "dependencies": {
     "@x402/core": "2.12.0"
+  },
+  "peerDependencies": {
+    "@mysten/sui": "2.17.0",
+    "zod": "4.4.3"
   }
 }
