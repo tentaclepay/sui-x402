@@ -1,0 +1,43 @@
+name: Publish @tentaclepay/sui-x402 package to NPM
+
+on:
+  workflow_dispatch:
+
+jobs:
+  publish-npm-x402-sui:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: npm
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.12
+
+      - uses: actions/cache@v5
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
+          restore-keys: ${{ runner.os }}-bun-
+
+      - name: Install and build
+        working-directory: ./typescript
+        run: |
+          bun install --frozen-lockfile --ignore-scripts
+          bun run build
+
+      - name: Publish @tentaclepay/sui-x402 package
+        working-directory: ./typescript
+        run: |
+          # Get package information directly
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+
+          echo "Package: $PACKAGE_NAME@$PACKAGE_VERSION"
+
+          echo "Publishing to NPM (main branch)"
+          bun publish --provenance --access public
