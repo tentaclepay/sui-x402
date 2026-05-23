@@ -7,10 +7,10 @@ import type {
 } from "@x402/core/types";
 import { fromBase64, normalizeSuiAddress } from "@mysten/sui/utils";
 
-import type { SuiClientRegistry } from "../../client";
+import type { SuiClientRegistry } from "../../client-registry";
 import type { FacilitatorSuiSigner } from "../../signer";
 import type { ExactSuiPayload, SuiNetwork } from "../../types";
-import { createSuiClientRegistry } from "../../client";
+import { createSuiClientRegistry } from "../../client-registry";
 import { exactSuiPayloadSchema } from "../../types";
 import { isValidNetwork } from "../../utils";
 import { validateGaslessTransaction } from "./gasless";

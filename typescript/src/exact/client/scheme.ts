@@ -4,13 +4,13 @@ import type {
   SchemeNetworkClient,
 } from "@x402/core/types";
 import { Transaction } from "@mysten/sui/transactions";
-import { isValidSuiAddress } from "@mysten/sui/utils";
+import { isValidSuiAddress, toBase64 } from "@mysten/sui/utils";
 import { PaymentRequirementsV2Schema } from "@x402/core/schemas";
 
-import type { SuiClientRegistry } from "../../client";
+import type { SuiClientRegistry } from "../../client-registry";
 import type { ClientSuiSigner } from "../../signer";
 import type { ExactSuiPayload } from "../../types";
-import { createSuiClientRegistry } from "../../client";
+import { createSuiClientRegistry } from "../../client-registry";
 import { isValidNetwork } from "../../utils";
 
 export type ExactSuiSchemeOptions = {
@@ -86,7 +86,7 @@ export class ExactSuiScheme implements SchemeNetworkClient {
     const transactionBytes = await transaction.build({
       client,
     });
-    const transactionBase64 = transactionBytes.toBase64();
+    const transactionBase64 = toBase64(transactionBytes)
 
     const signature = await this.signer.signTransaction(transactionBase64);
 
