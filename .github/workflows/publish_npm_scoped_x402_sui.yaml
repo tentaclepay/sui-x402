@@ -5,7 +5,7 @@ on:
 
 jobs:
   publish-npm-x402-sui:
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     environment: npm
     permissions:
@@ -40,4 +40,4 @@ jobs:
           echo "Package: $PACKAGE_NAME@$PACKAGE_VERSION"
 
           echo "Publishing to NPM (main branch)"
-          bun publish --provenance --access public
+          npm publish --provenance --access public
