@@ -1,1 +1,20 @@
-console.log("Hello Sui!");
+export { ExactSuiScheme } from "./exact";
+
+// Export signer utilities and types
+export { toFacilitatorSuiSigner } from "./signer";
+export type {
+  ClientSuiSigner,
+  FacilitatorSuiSigner,
+} from "./signer";
+
+// Export payload types
+export type { ExactSuiPayload } from "./types";
+
+// Export client registry
+export * from "./client-registry";
+
+// Export constants
+export * from "./constants";
+
+// Export utilities
+export * from "./utils";

@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/package.json",
   "name": "@tentaclepay/sui-x402",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
   "types": "./dist/cjs/index.d.ts",
@@ -39,6 +39,36 @@
       "require": {
         "types": "./dist/cjs/index.d.ts",
         "default": "./dist/cjs/index.js"
+      }
+    },
+    "./exact/client": {
+      "import": {
+        "types": "./dist/esm/exact/client/index.d.mts",
+        "default": "./dist/esm/exact/client/index.mjs"
+      },
+      "require": {
+        "types": "./dist/cjs/exact/client/index.d.ts",
+        "default": "./dist/cjs/exact/client/index.js"
+      }
+    },
+    "./exact/server": {
+      "import": {
+        "types": "./dist/esm/exact/server/index.d.mts",
+        "default": "./dist/esm/exact/server/index.mjs"
+      },
+      "require": {
+        "types": "./dist/cjs/exact/server/index.d.ts",
+        "default": "./dist/cjs/exact/server/index.js"
+      }
+    },
+    "./exact/facilitator": {
+      "import": {
+        "types": "./dist/esm/exact/facilitator/index.d.mts",
+        "default": "./dist/esm/exact/facilitator/index.mjs"
+      },
+      "require": {
+        "types": "./dist/cjs/exact/facilitator/index.d.ts",
+        "default": "./dist/cjs/exact/facilitator/index.js"
       }
     }
   },
