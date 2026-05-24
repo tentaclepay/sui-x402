@@ -51,6 +51,11 @@ export const TESTNET_TOKEN_LIST = [USDC_TESTNET_COIN_TYPE] as const;
  */
 export const USDC_DECIMAL = 6 as const;
 export const USDSUI_DECIMAL = 6 as const;
+export const SUI_USDE_DECIMAL = 6 as const;
+export const USDY_DECIMAL = 6 as const;
+export const FDUSD_DECIMAL = 6 as const;
+export const AUSD_DECIMAL = 6 as const;
+export const USDB_DECIMAL = 6 as const;
 
 /**
  * CAIP-2 network identifiers for Sui (V2)
