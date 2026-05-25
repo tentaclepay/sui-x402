@@ -102,7 +102,7 @@ class SuiFacilitatorClient implements FacilitatorClient {
   }
 
   async getSupported(): Promise<SupportedResponse> {
-    return this.facilitator.getSupported() as SupportedResponse
+    return this.facilitator.getSupported() as SupportedResponse;
   }
 }
 
@@ -112,7 +112,8 @@ class SuiFacilitatorClient implements FacilitatorClient {
 function buildSuiPaymentRequirements(
   payTo: string,
   amount: string,
-  network: Network = SUI_TESTNET_CAIP2
+  network: Network = SUI_TESTNET_CAIP2,
+  extra: Record<string, unknown> = {}
 ): PaymentRequirements {
   return {
     scheme: "exact",
@@ -121,7 +122,7 @@ function buildSuiPaymentRequirements(
     amount,
     payTo,
     maxTimeoutSeconds: 3600,
-    extra: {},
+    extra,
   };
 }
 
@@ -130,6 +131,7 @@ describe("Sui Integration Tests", () => {
     let client: x402Client;
     let server: x402ResourceServer;
     let clientAddress: string;
+    let gasOwner: string;
 
     beforeEach(async () => {
       const clientKeypair = Ed25519Keypair.fromSecretKey(
@@ -146,6 +148,7 @@ describe("Sui Integration Tests", () => {
       );
       const facilitatorSigner =
         toFacilitatorSuiSignerFromKeypair(facilitatorKeypair);
+      gasOwner = facilitatorKeypair.toSuiAddress();
 
       const suiFacilitator = new ExactSuiFacilitator(facilitatorSigner);
       const facilitator = new x402Facilitator().register(
@@ -161,7 +164,12 @@ describe("Sui Integration Tests", () => {
 
     it("server should successfully verify and settle a Sui payment from a client", async () => {
       const accepts = [
-        buildSuiPaymentRequirements(RESOURCE_SERVER_ADDRESS as string, "1000"),
+        buildSuiPaymentRequirements(
+          RESOURCE_SERVER_ADDRESS as string,
+          "1000",
+          SUI_TESTNET_CAIP2,
+          { gasOwner }
+        ),
       ];
       const resource = {
         url: "https://company.co",

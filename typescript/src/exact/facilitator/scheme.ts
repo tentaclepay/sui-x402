@@ -13,7 +13,7 @@ import type { ExactSuiPayload, SuiNetwork } from "../../types";
 import { createSuiClientRegistry } from "../../client-registry";
 import { exactSuiPayloadSchema } from "../../types";
 import { isValidNetwork } from "../../utils";
-import { validateGaslessTransaction } from "./gasless";
+import { validateSendFundsTransaction } from "./send-funds";
 
 export type ExactSuiSchemeOptions = {
   clientRegistry?: SuiClientRegistry;
@@ -43,12 +43,19 @@ export class ExactSuiScheme implements SchemeNetworkFacilitator {
 
   /**
    * Get mechanism-specific extra data for the supported kinds endpoint.
+   * For Sui, this includes a randomly selected gas owner address.
+   * Random selection distributes load across multiple signers.
    *
    * @param _ - The network identifier (unused for Sui)
-   * @returns Extra data
+   * @returns Extra data with gasOwner address
    */
   getExtra(_: string): Record<string, unknown> | undefined {
-    return {};
+    const addresses = this.signer.getAddresses();
+    const randomIndex = Math.floor(Math.random() * addresses.length);
+
+    return {
+      gasOwner: addresses[randomIndex],
+    };
   }
 
   /**
@@ -97,7 +104,7 @@ export class ExactSuiScheme implements SchemeNetworkFacilitator {
 
     const transaction = fromBase64(exactSuiPayload.transaction);
 
-    if (!validateGaslessTransaction(transaction, requirements))
+    if (!validateSendFundsTransaction(transaction, requirements))
       return { isValid: false, invalidReason: "invalid_transaction" };
 
     const client = this.clientRegistry.get(network);
@@ -151,13 +158,16 @@ export class ExactSuiScheme implements SchemeNetworkFacilitator {
       };
 
     const network = payload.accepted.network as SuiNetwork;
-    const { transaction, signature } = payload.payload as ExactSuiPayload;
+    const { transaction, signature: clientSignature } =
+      payload.payload as ExactSuiPayload;
 
     const client = this.clientRegistry.get(network);
 
+    const sponsorSignature = await this.signer.signTransaction(transaction);
+
     const result = await client.executeTransaction({
       transaction: fromBase64(transaction),
-      signatures: [signature],
+      signatures: [clientSignature, sponsorSignature],
       include: {
         transaction: true,
       },

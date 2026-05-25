@@ -1,9 +1,4 @@
-import type {
-  Argument,
-  CallArg,
-  Command,
-  TransactionData,
-} from "@mysten/sui/transactions";
+import type { Argument, CallArg, Command } from "@mysten/sui/transactions";
 import type { PaymentRequirements } from "@x402/core/types";
 import { Transaction } from "@mysten/sui/transactions";
 import {
@@ -12,43 +7,39 @@ import {
   normalizeSuiAddress,
 } from "@mysten/sui/utils";
 
+import type { SuiAddress } from "../../types";
+
 const SUI_FRAMEWORK = normalizeSuiAddress("0x2");
 
 type SuiCommands = Command[];
 type SuiInputs = CallArg[];
 type MoveCallCommand = Extract<Command, { $kind: "MoveCall" }>["MoveCall"];
 
-export function isGaslessTransaction(
-  transactionData: TransactionData
-): boolean {
-  const { sender } = transactionData;
-  const { budget, price, payment, owner } = transactionData.gasData;
-
-  if (budget !== null && BigInt(budget) !== 0n) return false;
-  if (price !== null && BigInt(price) !== 0n) return false;
-  if (payment && payment.length !== 0) return false;
-  if (
-    sender &&
-    owner &&
-    normalizeSuiAddress(owner) !== normalizeSuiAddress(sender)
-  )
-    return false;
-
-  return true;
-}
-
-export function validateGaslessTransaction(
+export function validateSendFundsTransaction(
   transactionBytes: Uint8Array,
   requirements: PaymentRequirements
 ): boolean {
   const transaction = Transaction.from(transactionBytes);
   const transactionData = transaction.getData();
 
-  if (!isGaslessTransaction(transactionData)) return false;
-
   const expectedAsset = normalizeStructTag(requirements.asset);
   const expectedPayTo = normalizeSuiAddress(requirements.payTo);
   const expectedAmount = BigInt(requirements.amount);
+
+  if (
+    !transactionData.gasData.owner ||
+    !transactionData.gasData.payment ||
+    transactionData.gasData.payment.length !== 0
+  )
+    return false;
+
+  const sponsor = requirements.extra?.gasOwner as SuiAddress;
+  if (!sponsor) return false;
+
+  const isValidGasOwner =
+    normalizeSuiAddress(transactionData.gasData.owner) ===
+    normalizeSuiAddress(sponsor);
+  if (!isValidGasOwner) return false;
 
   const sendFunds = findSendFundsCommand(transactionData.commands);
   if (!sendFunds) return false;

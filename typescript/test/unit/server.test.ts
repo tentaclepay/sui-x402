@@ -197,7 +197,7 @@ describe("ExactSuiScheme (Server)", () => {
   });
 
   describe("enhancePaymentRequirements", () => {
-    it("should add gasSponsor from supportedKind extra", async () => {
+    it("should add gasOwner from supportedKind extra", async () => {
       const requirements: PaymentRequirements = {
         scheme: "exact",
         network: SUI_MAINNET_CAIP2,
@@ -214,12 +214,12 @@ describe("ExactSuiScheme (Server)", () => {
           x402Version: 2,
           scheme: "exact",
           network: SUI_MAINNET_CAIP2,
-          extra: { gasSponsor: "0xsponsor" },
+          extra: { gasOwner: "0xsponsor" },
         },
         []
       );
 
-      expect(result.extra?.gasSponsor).toBe("0xsponsor");
+      expect(result.extra?.gasOwner).toBe("0xsponsor");
     });
 
     it("should preserve existing extra fields", async () => {
@@ -239,18 +239,18 @@ describe("ExactSuiScheme (Server)", () => {
           x402Version: 2,
           scheme: "exact",
           network: SUI_MAINNET_CAIP2,
-          extra: { gasSponsor: "0xsponsor" },
+          extra: { gasOwner: "0xsponsor" },
         },
         []
       );
 
       expect(result.extra).toEqual({
         custom: "value",
-        gasSponsor: "0xsponsor",
+        gasOwner: "0xsponsor",
       });
     });
 
-    it("should not error when supportedKind has no gasSponsor", async () => {
+    it("should not error when supportedKind has no gasOwner", async () => {
       const requirements: PaymentRequirements = {
         scheme: "exact",
         network: SUI_MAINNET_CAIP2,
@@ -272,7 +272,7 @@ describe("ExactSuiScheme (Server)", () => {
         []
       );
 
-      expect(result.extra?.gasSponsor).toBeUndefined();
+      expect(result.extra?.gasOwner).toBeUndefined();
     });
   });
 });

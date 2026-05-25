@@ -2,7 +2,7 @@ import type { PaymentPayload, PaymentRequirements } from "@x402/core/types";
 import { Transaction } from "@mysten/sui/transactions";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { SuiClientRegistry } from "../../src/client";
+import type { SuiClientRegistry } from "../../src/client-registry";
 import type { FacilitatorSuiSigner } from "../../src/signer";
 import {
   SUI_MAINNET_CAIP2,
@@ -12,23 +12,24 @@ import {
 } from "../../src/constants";
 import { ExactSuiScheme } from "../../src/exact/facilitator/scheme";
 
-async function buildEmptyGaslessTxBase64(): Promise<string> {
-  const tx = new Transaction();
-  tx.setSender(
-    "0x0000000000000000000000000000000000000000000000000000000000000099"
-  );
-  tx.setGasPrice(0);
-  tx.setGasBudget(0);
-  tx.setGasPayment([]);
-  tx.setExpiration({ Epoch: 0 });
-  const bytes = await tx.build();
-  return Buffer.from(bytes).toString("base64");
-}
-
 const FACILITATOR_ADDRESS =
   "0x0000000000000000000000000000000000000000000000000000000000000099";
 const PAY_TO_ADDRESS =
   "0x0000000000000000000000000000000000000000000000000000000000000001";
+
+async function buildEmptySendFundsTxBase64(): Promise<string> {
+  const tx = new Transaction();
+  tx.setSender(
+    "0x0000000000000000000000000000000000000000000000000000000000000099"
+  );
+  tx.setGasOwner(FACILITATOR_ADDRESS);
+  tx.setGasPayment([]);
+  tx.setGasPrice(1000);
+  tx.setGasBudget(10_000_000);
+  tx.setExpiration({ Epoch: 0 });
+  const bytes = await tx.build();
+  return Buffer.from(bytes).toString("base64");
+}
 
 describe("ExactSuiScheme (Facilitator)", () => {
   let mockSigner: FacilitatorSuiSigner;
@@ -69,16 +70,36 @@ describe("ExactSuiScheme (Facilitator)", () => {
   });
 
   describe("getExtra", () => {
-    it("should return an empty object", () => {
+    it("should return a gasOwner selected from the signer addresses", () => {
       const facilitator = new ExactSuiScheme(mockSigner);
-      expect(facilitator.getExtra(SUI_MAINNET_CAIP2)).toEqual({});
+      const extra = facilitator.getExtra(SUI_MAINNET_CAIP2);
+
+      expect(extra).toEqual({ gasOwner: FACILITATOR_ADDRESS });
     });
 
     it("should not depend on the network argument", () => {
       const facilitator = new ExactSuiScheme(mockSigner);
+      // Single-address signer makes the random pick deterministic so we can
+      // compare across calls without flake.
       expect(facilitator.getExtra(SUI_MAINNET_CAIP2)).toEqual(
         facilitator.getExtra(SUI_TESTNET_CAIP2)
       );
+    });
+
+    it("should pick a gasOwner from the available signer addresses", () => {
+      const otherAddress =
+        "0x00000000000000000000000000000000000000000000000000000000000000aa";
+      const multiSigner: FacilitatorSuiSigner = {
+        getAddresses: vi.fn().mockReturnValue([FACILITATOR_ADDRESS, otherAddress]),
+        signTransaction: vi.fn(),
+      };
+      const facilitator = new ExactSuiScheme(multiSigner);
+
+      const extra = facilitator.getExtra(SUI_MAINNET_CAIP2) as {
+        gasOwner: string;
+      };
+
+      expect([FACILITATOR_ADDRESS, otherAddress]).toContain(extra.gasOwner);
     });
   });
 
@@ -224,13 +245,13 @@ describe("ExactSuiScheme (Facilitator)", () => {
       expect(result.invalidReason).toBe("invalid_exact_sui_payload");
     });
 
-    it("should reject if the payload transaction is not a gasless send_funds", async () => {
+    it("should reject if the payload transaction is not a sponsored send_funds", async () => {
       const facilitator = new ExactSuiScheme(mockSigner, {
         clientRegistry: mockRegistry,
       });
 
       // Real, decodable transaction — but no send_funds command at all
-      const transactionBase64 = await buildEmptyGaslessTxBase64();
+      const transactionBase64 = await buildEmptySendFundsTxBase64();
 
       const payload: PaymentPayload = {
         x402Version: 2,
@@ -241,7 +262,7 @@ describe("ExactSuiScheme (Facilitator)", () => {
           amount: "100000",
           payTo: PAY_TO_ADDRESS,
           maxTimeoutSeconds: 3600,
-          extra: {},
+          extra: { gasOwner: FACILITATOR_ADDRESS },
         },
         payload: {
           transaction: transactionBase64,
@@ -256,7 +277,7 @@ describe("ExactSuiScheme (Facilitator)", () => {
         amount: "100000",
         payTo: PAY_TO_ADDRESS,
         maxTimeoutSeconds: 3600,
-        extra: {},
+        extra: { gasOwner: FACILITATOR_ADDRESS },
       };
 
       const result = await facilitator.verify(payload, requirements);

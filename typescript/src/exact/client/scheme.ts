@@ -9,7 +9,7 @@ import { PaymentRequirementsV2Schema } from "@x402/core/schemas";
 
 import type { SuiClientRegistry } from "../../client-registry";
 import type { ClientSuiSigner } from "../../signer";
-import type { ExactSuiPayload } from "../../types";
+import type { ExactSuiPayload, SuiAddress } from "../../types";
 import { createSuiClientRegistry } from "../../client-registry";
 import { isValidNetwork } from "../../utils";
 
@@ -68,7 +68,16 @@ export class ExactSuiScheme implements SchemeNetworkClient {
 
     const client = this.clientRegistry.get(network);
 
+    const gasOwner = paymentRequirements.extra?.gasOwner as SuiAddress;
+    if (!gasOwner) {
+      throw new Error(
+        "gasOwner is required in paymentRequirements.extra for Sui transactions"
+      );
+    }
+
     const transaction = new Transaction();
+
+    const resolvedAmount = BigInt(amount);
 
     transaction.setSender(this.signer.address);
     transaction.moveCall({
@@ -77,16 +86,18 @@ export class ExactSuiScheme implements SchemeNetworkClient {
       arguments: [
         transaction.balance({
           type: asset,
-          balance: BigInt(amount),
+          balance: resolvedAmount,
         }),
         transaction.pure.address(payTo),
       ],
     });
+    transaction.setGasOwner(gasOwner);
+    transaction.setGasPayment([]);
 
     const transactionBytes = await transaction.build({
       client,
     });
-    const transactionBase64 = toBase64(transactionBytes)
+    const transactionBase64 = toBase64(transactionBytes);
 
     const signature = await this.signer.signTransaction(transactionBase64);
 

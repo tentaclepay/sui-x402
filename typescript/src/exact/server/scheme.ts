@@ -42,22 +42,20 @@ export class ExactSuiScheme implements SchemeNetworkServer {
    * @param supportedKind.x402Version - The x402 protocol version
    * @param supportedKind.scheme - The payment scheme
    * @param supportedKind.network - The network identifier
-   * @param supportedKind.extra - Extra metadata including gasSponsor address
+   * @param supportedKind.extra - Extra metadata including gasOwner address
    * @param extensionKeys - Extension keys supported by the facilitator
-   * @returns Enhanced payment requirements with gasSponsor in extra
+   * @returns Enhanced payment requirements with gasOwner in extra
    */
   async enhancePaymentRequirements(
     paymentRequirements: PaymentRequirements,
     supportedKind: SupportedKind,
     _facilitatorExtensions: string[]
   ): Promise<PaymentRequirements> {
-    // Add gasSponsor from supportedKind.extra to payment requirements
-    // The facilitator provides its address as the gas sponsor for transaction fees
     return {
       ...paymentRequirements,
       extra: {
         ...paymentRequirements.extra,
-        gasSponsor: supportedKind.extra?.gasSponsor,
+        gasOwner: supportedKind.extra?.gasOwner,
       },
     };
   }

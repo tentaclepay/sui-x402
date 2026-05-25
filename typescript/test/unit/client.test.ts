@@ -1,7 +1,7 @@
 import type { PaymentRequirements } from "@x402/core/types";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { SuiClientRegistry } from "../../src/client";
+import type { SuiClientRegistry } from "../../src/client-registry";
 import type { ClientSuiSigner } from "../../src/signer";
 import {
   SUI_MAINNET_CAIP2,
@@ -128,6 +128,26 @@ describe("ExactSuiScheme (Client)", () => {
       await expect(
         client.createPaymentPayload(2, requirements)
       ).rejects.toThrow(/Invalid recipient address/);
+    });
+
+    it("should reject when gasOwner is missing from requirements.extra", async () => {
+      const client = new ExactSuiScheme(mockSigner, {
+        clientRegistry: mockRegistry,
+      });
+
+      const requirements: PaymentRequirements = {
+        scheme: "exact",
+        network: SUI_MAINNET_CAIP2,
+        asset: USDC_MAINNET_COIN_TYPE,
+        amount: "100000",
+        payTo: VALID_SUI_ADDRESS,
+        maxTimeoutSeconds: 3600,
+        extra: {},
+      };
+
+      await expect(
+        client.createPaymentPayload(2, requirements)
+      ).rejects.toThrow(/gasOwner is required/);
     });
 
     it("should accept V2 PaymentRequirements with amount field", () => {

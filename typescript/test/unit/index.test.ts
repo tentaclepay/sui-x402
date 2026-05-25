@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { createSuiClientRegistry } from "../../src/client";
+import { createSuiClientRegistry } from "../../src/client-registry";
 import {
   SUI_DEVNET_CAIP2,
   SUI_MAINNET_CAIP2,
