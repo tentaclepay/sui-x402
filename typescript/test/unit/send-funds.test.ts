@@ -22,14 +22,15 @@ function buildSendFundsTransaction(
   asset: string,
   amount: bigint,
   payTo: string,
-  gasOwner: string = GAS_OWNER
+  gasOwner: string = GAS_OWNER,
+  gasBudget: number | bigint = 10_000_000
 ): Transaction {
   const tx = new Transaction();
   tx.setSender(SENDER);
   tx.setGasOwner(gasOwner);
   tx.setGasPayment([]);
   tx.setGasPrice(1000);
-  tx.setGasBudget(10_000_000);
+  tx.setGasBudget(gasBudget);
   tx.setExpiration({ Epoch: 0 });
 
   const withdrawal = tx.withdrawal({ amount, type: asset });
@@ -57,7 +58,8 @@ describe("validateSendFundsTransaction", () => {
     amount: "1000000",
     payTo: PAY_TO,
     maxTimeoutSeconds: 3600,
-    extra: { gasOwner: GAS_OWNER },
+    // Default tx budget produced by the helper is 10_000_000.
+    extra: { gasOwner: GAS_OWNER, gasBudget: 10_000_000n },
   };
 
   it("should validate a correctly-built send_funds transaction", async () => {
@@ -159,6 +161,76 @@ describe("validateSendFundsTransaction", () => {
     const bytes = await tx.build();
 
     expect(validateSendFundsTransaction(bytes, baseRequirements)).toBe(false);
+  });
+
+  describe("gas budget validation", () => {
+    const GAS_BUDGET = 10_000_000n;
+    const requirementsWithBudget: PaymentRequirements = {
+      ...baseRequirements,
+      extra: { gasOwner: GAS_OWNER, gasBudget: GAS_BUDGET },
+    };
+
+    it("should validate when the transaction gas budget equals the allowed budget", async () => {
+      const tx = buildSendFundsTransaction(
+        USDC_MAINNET_COIN_TYPE,
+        1_000_000n,
+        PAY_TO,
+        GAS_OWNER,
+        GAS_BUDGET
+      );
+      const bytes = await tx.build();
+
+      expect(validateSendFundsTransaction(bytes, requirementsWithBudget)).toBe(
+        true
+      );
+    });
+
+    it("should validate when the transaction gas budget is below the allowed budget", async () => {
+      const tx = buildSendFundsTransaction(
+        USDC_MAINNET_COIN_TYPE,
+        1_000_000n,
+        PAY_TO,
+        GAS_OWNER,
+        5_000_000n
+      );
+      const bytes = await tx.build();
+
+      expect(validateSendFundsTransaction(bytes, requirementsWithBudget)).toBe(
+        true
+      );
+    });
+
+    it("should reject when the transaction gas budget exceeds the allowed budget", async () => {
+      const tx = buildSendFundsTransaction(
+        USDC_MAINNET_COIN_TYPE,
+        1_000_000n,
+        PAY_TO,
+        GAS_OWNER,
+        50_000_000n
+      );
+      const bytes = await tx.build();
+
+      expect(validateSendFundsTransaction(bytes, requirementsWithBudget)).toBe(
+        false
+      );
+    });
+
+    it("should reject when gasBudget is missing from requirements.extra", async () => {
+      const tx = buildSendFundsTransaction(
+        USDC_MAINNET_COIN_TYPE,
+        1_000_000n,
+        PAY_TO
+      );
+      const bytes = await tx.build();
+      const requirementsWithoutBudget: PaymentRequirements = {
+        ...baseRequirements,
+        extra: { gasOwner: GAS_OWNER },
+      };
+
+      expect(
+        validateSendFundsTransaction(bytes, requirementsWithoutBudget)
+      ).toBe(false);
+    });
   });
 
   it("should reject a transaction calling send_funds on a non-framework package", async () => {

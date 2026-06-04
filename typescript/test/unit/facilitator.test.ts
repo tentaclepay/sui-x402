@@ -16,6 +16,7 @@ const FACILITATOR_ADDRESS =
   "0x0000000000000000000000000000000000000000000000000000000000000099";
 const PAY_TO_ADDRESS =
   "0x0000000000000000000000000000000000000000000000000000000000000001";
+const GAS_BUDGET = 2_000_000n;
 
 async function buildEmptySendFundsTxBase64(): Promise<string> {
   const tx = new Transaction();
@@ -38,6 +39,7 @@ describe("ExactSuiScheme (Facilitator)", () => {
   beforeEach(() => {
     mockSigner = {
       getAddresses: vi.fn().mockReturnValue([FACILITATOR_ADDRESS]),
+      getGasBudget: vi.fn().mockReturnValue(GAS_BUDGET),
       signTransaction: vi.fn().mockResolvedValue("signedTx"),
     };
 
@@ -74,7 +76,25 @@ describe("ExactSuiScheme (Facilitator)", () => {
       const facilitator = new ExactSuiScheme(mockSigner);
       const extra = facilitator.getExtra(SUI_MAINNET_CAIP2);
 
-      expect(extra).toEqual({ gasOwner: FACILITATOR_ADDRESS });
+      expect(extra).toEqual({
+        gasOwner: FACILITATOR_ADDRESS,
+        gasBudget: GAS_BUDGET,
+      });
+    });
+
+    it("should include the gas budget reported by the signer", () => {
+      const customSigner: FacilitatorSuiSigner = {
+        getAddresses: vi.fn().mockReturnValue([FACILITATOR_ADDRESS]),
+        getGasBudget: vi.fn().mockReturnValue(9_000_000n),
+        signTransaction: vi.fn(),
+      };
+      const facilitator = new ExactSuiScheme(customSigner);
+
+      const extra = facilitator.getExtra(SUI_MAINNET_CAIP2) as {
+        gasBudget: bigint;
+      };
+
+      expect(extra.gasBudget).toBe(9_000_000n);
     });
 
     it("should not depend on the network argument", () => {
@@ -91,6 +111,7 @@ describe("ExactSuiScheme (Facilitator)", () => {
         "0x00000000000000000000000000000000000000000000000000000000000000aa";
       const multiSigner: FacilitatorSuiSigner = {
         getAddresses: vi.fn().mockReturnValue([FACILITATOR_ADDRESS, otherAddress]),
+        getGasBudget: vi.fn().mockReturnValue(GAS_BUDGET),
         signTransaction: vi.fn(),
       };
       const facilitator = new ExactSuiScheme(multiSigner);
@@ -122,6 +143,7 @@ describe("ExactSuiScheme (Facilitator)", () => {
     it("should reflect multiple addresses from the signer", () => {
       const multiSigner: FacilitatorSuiSigner = {
         getAddresses: vi.fn().mockReturnValue([FACILITATOR_ADDRESS, "0xabc"]),
+        getGasBudget: vi.fn().mockReturnValue(GAS_BUDGET),
         signTransaction: vi.fn(),
       };
       const facilitator = new ExactSuiScheme(multiSigner);

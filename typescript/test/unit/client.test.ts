@@ -150,6 +150,27 @@ describe("ExactSuiScheme (Client)", () => {
       ).rejects.toThrow(/gasOwner is required/);
     });
 
+    it("should reject when gasBudget is missing from requirements.extra", async () => {
+      const client = new ExactSuiScheme(mockSigner, {
+        clientRegistry: mockRegistry,
+      });
+
+      const requirements: PaymentRequirements = {
+        scheme: "exact",
+        network: SUI_MAINNET_CAIP2,
+        asset: USDC_MAINNET_COIN_TYPE,
+        amount: "100000",
+        payTo: VALID_SUI_ADDRESS,
+        maxTimeoutSeconds: 3600,
+        // gasOwner is present, but gasBudget is not
+        extra: { gasOwner: VALID_SUI_ADDRESS },
+      };
+
+      await expect(
+        client.createPaymentPayload(2, requirements)
+      ).rejects.toThrow(/gasBudget is required/);
+    });
+
     it("should accept V2 PaymentRequirements with amount field", () => {
       const client = new ExactSuiScheme(mockSigner);
 

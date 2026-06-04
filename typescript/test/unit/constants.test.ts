@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   AUSD_MAINNET_COIN_TYPE,
+  DEFAULT_GAS_BUDGET,
   FDUSD_MAINNET_COIN_TYPE,
   MAINNET_TOKEN_LIST,
   SUI_DEVNET_CAIP2,
@@ -134,6 +135,13 @@ describe("Sui Constants", () => {
 
     it("should have correct USDSUI decimals", () => {
       expect(USDSUI_DECIMAL).toBe(6);
+    });
+  });
+
+  describe("Gas budget", () => {
+    it("should expose the default facilitator gas budget as a bigint", () => {
+      expect(DEFAULT_GAS_BUDGET).toBe(2_000_000n);
+      expect(typeof DEFAULT_GAS_BUDGET).toBe("bigint");
     });
   });
 });

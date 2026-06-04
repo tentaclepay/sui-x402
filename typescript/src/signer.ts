@@ -13,7 +13,7 @@ export type FacilitatorSuiSigner = {
 };
 
 export function toFacilitatorSuiSigner(
-  signer: Omit<FacilitatorSuiSigner, "getAddresses"> & {
+  signer: Omit<FacilitatorSuiSigner, "getAddresses" | "getGasBudget"> & {
     address: SuiAddress;
   },
   gasBudget: string | number | bigint = DEFAULT_GAS_BUDGET

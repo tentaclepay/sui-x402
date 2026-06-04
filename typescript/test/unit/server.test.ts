@@ -222,6 +222,32 @@ describe("ExactSuiScheme (Server)", () => {
       expect(result.extra?.gasOwner).toBe("0xsponsor");
     });
 
+    it("should add gasBudget from supportedKind extra", async () => {
+      const requirements: PaymentRequirements = {
+        scheme: "exact",
+        network: SUI_MAINNET_CAIP2,
+        asset: USDC_MAINNET_COIN_TYPE,
+        amount: "100000",
+        payTo: "0xabc",
+        maxTimeoutSeconds: 3600,
+        extra: {},
+      };
+
+      const result = await server.enhancePaymentRequirements(
+        requirements,
+        {
+          x402Version: 2,
+          scheme: "exact",
+          network: SUI_MAINNET_CAIP2,
+          extra: { gasOwner: "0xsponsor", gasBudget: 2_000_000n },
+        },
+        []
+      );
+
+      expect(result.extra?.gasOwner).toBe("0xsponsor");
+      expect(result.extra?.gasBudget).toBe(2_000_000n);
+    });
+
     it("should preserve existing extra fields", async () => {
       const requirements: PaymentRequirements = {
         scheme: "exact",

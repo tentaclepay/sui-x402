@@ -38,8 +38,9 @@ export function validateSendFundsTransaction(
 
   const gasBudget = requirements.extra?.gasBudget as bigint;
   if (
+    !gasBudget ||
     !transactionData.gasData.budget ||
-    BigInt(transactionData.gasData.budget) > gasBudget
+    BigInt(transactionData.gasData.budget) > BigInt(gasBudget)
   )
     return false;
 
