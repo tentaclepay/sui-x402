@@ -87,6 +87,7 @@ export class ExactSuiScheme implements SchemeNetworkClient {
         transaction.balance({
           type: asset,
           balance: resolvedAmount,
+          useGasCoin: false,
         }),
         transaction.pure.address(payTo),
       ],
