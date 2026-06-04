@@ -13,7 +13,6 @@ import { ExactSuiScheme as ExactSuiClient } from "../../src/exact/client/scheme"
 import { ExactSuiScheme as ExactSuiFacilitator } from "../../src/exact/facilitator/scheme";
 import { ExactSuiScheme as ExactSuiServer } from "../../src/exact/server/scheme";
 import { toFacilitatorSuiSigner } from "../../src/signer";
-import { exactSuiPayloadSchema } from "../../src/types";
 import { getUsdcCoinType, isValidNetwork } from "../../src/utils";
 
 describe("@tentaclepay/sui-x402 exports", () => {
@@ -49,11 +48,6 @@ describe("@tentaclepay/sui-x402 exports", () => {
 
   it("should export signer helpers", () => {
     expect(toFacilitatorSuiSigner).toBeDefined();
-  });
-
-  it("should export the payload zod schema", () => {
-    expect(exactSuiPayloadSchema).toBeDefined();
-    expect(typeof exactSuiPayloadSchema.safeParse).toBe("function");
   });
 
   describe("integration of exported pieces", () => {

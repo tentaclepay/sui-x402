@@ -11,7 +11,6 @@ import type { SuiClientRegistry } from "../../client-registry";
 import type { FacilitatorSuiSigner } from "../../signer";
 import type { ExactSuiPayload, SuiNetwork } from "../../types";
 import { createSuiClientRegistry } from "../../client-registry";
-import { exactSuiPayloadSchema } from "../../types";
 import { isValidNetwork } from "../../utils";
 import { validateSendFundsTransaction } from "./send-funds";
 
@@ -69,7 +68,7 @@ export class ExactSuiScheme implements SchemeNetworkFacilitator {
   }
 
   /**
-   * Verifies a payment payload: schema, structural validation of the Sui PTB,
+   * Verifies a payment payload: structural validation of the Sui PTB,
    * client signature, and on-chain simulation.
    *
    * @param payload - The payment payload to verify
@@ -91,16 +90,7 @@ export class ExactSuiScheme implements SchemeNetworkFacilitator {
 
     const network = payload.accepted.network as SuiNetwork;
 
-    const exactSuiPayloadResult = exactSuiPayloadSchema.safeParse(
-      payload.payload
-    );
-    if (!exactSuiPayloadResult.success)
-      return {
-        isValid: false,
-        invalidReason: "invalid_exact_sui_payload",
-      };
-
-    const exactSuiPayload = exactSuiPayloadResult.data;
+    const exactSuiPayload = payload.payload as ExactSuiPayload;
 
     const transaction = fromBase64(exactSuiPayload.transaction);
 

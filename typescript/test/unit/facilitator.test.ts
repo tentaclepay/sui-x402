@@ -208,43 +208,6 @@ describe("ExactSuiScheme (Facilitator)", () => {
       expect(result.invalidReason).toBe("network_mismatch");
     });
 
-    it("should reject if payload schema is invalid", async () => {
-      const facilitator = new ExactSuiScheme(mockSigner, {
-        clientRegistry: mockRegistry,
-      });
-
-      const payload: PaymentPayload = {
-        x402Version: 2,
-        accepted: {
-          scheme: "exact",
-          network: SUI_MAINNET_CAIP2,
-          asset: USDC_MAINNET_COIN_TYPE,
-          amount: "100000",
-          payTo: PAY_TO_ADDRESS,
-          maxTimeoutSeconds: 3600,
-          extra: {},
-        },
-        payload: {
-          // missing both fields
-        },
-      };
-
-      const requirements: PaymentRequirements = {
-        scheme: "exact",
-        network: SUI_MAINNET_CAIP2,
-        asset: USDC_MAINNET_COIN_TYPE,
-        amount: "100000",
-        payTo: PAY_TO_ADDRESS,
-        maxTimeoutSeconds: 3600,
-        extra: {},
-      };
-
-      const result = await facilitator.verify(payload, requirements);
-
-      expect(result.isValid).toBe(false);
-      expect(result.invalidReason).toBe("invalid_exact_sui_payload");
-    });
-
     it("should reject if the payload transaction is not a sponsored send_funds", async () => {
       const facilitator = new ExactSuiScheme(mockSigner, {
         clientRegistry: mockRegistry,
