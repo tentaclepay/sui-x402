@@ -68,3 +68,8 @@ export const SUI_NETWORK_CAIP2_LIST = [
   SUI_TESTNET_CAIP2,
   SUI_DEVNET_CAIP2,
 ] as const;
+
+/**
+ * Facilitator gas budget for gas sponsoring transactions
+ */
+export const DEFAULT_GAS_BUDGET = 2_000_000n;

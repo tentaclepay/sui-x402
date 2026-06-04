@@ -54,6 +54,7 @@ export class ExactSuiScheme implements SchemeNetworkFacilitator {
 
     return {
       gasOwner: addresses[randomIndex],
+      gasBudget: this.signer.getGasBudget(),
     };
   }
 

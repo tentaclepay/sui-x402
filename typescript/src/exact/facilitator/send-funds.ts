@@ -36,6 +36,13 @@ export function validateSendFundsTransaction(
   const sponsor = requirements.extra?.gasOwner as SuiAddress;
   if (!sponsor) return false;
 
+  const gasBudget = requirements.extra?.gasBudget as bigint;
+  if (
+    !transactionData.gasData.budget ||
+    BigInt(transactionData.gasData.budget) > gasBudget
+  )
+    return false;
+
   const isValidGasOwner =
     normalizeSuiAddress(transactionData.gasData.owner) ===
     normalizeSuiAddress(sponsor);

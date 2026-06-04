@@ -75,6 +75,13 @@ export class ExactSuiScheme implements SchemeNetworkClient {
       );
     }
 
+    const gasBudget = paymentRequirements.extra?.gasBudget as bigint;
+    if (!gasBudget) {
+      throw new Error(
+        "gasBudget is required in paymentRequirements.extra for Sui transactions"
+      );
+    }
+
     const transaction = new Transaction();
 
     const resolvedAmount = BigInt(amount);
@@ -92,6 +99,7 @@ export class ExactSuiScheme implements SchemeNetworkClient {
         transaction.pure.address(payTo),
       ],
     });
+    transaction.setGasBudget(gasBudget);
     transaction.setGasOwner(gasOwner);
     transaction.setGasPayment([]);
 
