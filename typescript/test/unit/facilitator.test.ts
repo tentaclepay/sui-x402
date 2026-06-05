@@ -110,7 +110,9 @@ describe("ExactSuiScheme (Facilitator)", () => {
       const otherAddress =
         "0x00000000000000000000000000000000000000000000000000000000000000aa";
       const multiSigner: FacilitatorSuiSigner = {
-        getAddresses: vi.fn().mockReturnValue([FACILITATOR_ADDRESS, otherAddress]),
+        getAddresses: vi
+          .fn()
+          .mockReturnValue([FACILITATOR_ADDRESS, otherAddress]),
         getGasBudget: vi.fn().mockReturnValue(GAS_BUDGET),
         signTransaction: vi.fn(),
       };
