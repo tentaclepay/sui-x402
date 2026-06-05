@@ -75,7 +75,7 @@ export class ExactSuiScheme implements SchemeNetworkClient {
       );
     }
 
-    const gasBudget = paymentRequirements.extra?.gasBudget as bigint;
+    const gasBudget = paymentRequirements.extra?.gasBudget as string;
     if (!gasBudget) {
       throw new Error(
         "gasBudget is required in paymentRequirements.extra for Sui transactions"

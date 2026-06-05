@@ -89,8 +89,8 @@ describe("Sui Signer", () => {
           signTransaction: vi.fn() as never,
         });
 
-        expect(facilitator.getGasBudget()).toBe(DEFAULT_GAS_BUDGET);
-        expect(typeof facilitator.getGasBudget()).toBe("bigint");
+        expect(facilitator.getGasBudget()).toBe(DEFAULT_GAS_BUDGET.toString());
+        expect(typeof facilitator.getGasBudget()).toBe("string");
       });
 
       it("should accept a bigint budget", () => {
@@ -100,7 +100,7 @@ describe("Sui Signer", () => {
           signTransaction: vi.fn() as never,
         });
 
-        expect(facilitator.getGasBudget()).toBe(5_000_000n);
+        expect(facilitator.getGasBudget()).toBe("5000000");
       });
 
       it("should coerce a number budget to bigint", () => {
@@ -110,7 +110,7 @@ describe("Sui Signer", () => {
           signTransaction: vi.fn() as never,
         });
 
-        expect(facilitator.getGasBudget()).toBe(3_000_000n);
+        expect(facilitator.getGasBudget()).toBe("3000000");
       });
 
       it("should coerce a string budget to bigint", () => {
@@ -120,7 +120,7 @@ describe("Sui Signer", () => {
           signTransaction: vi.fn() as never,
         });
 
-        expect(facilitator.getGasBudget()).toBe(7_000_000n);
+        expect(facilitator.getGasBudget()).toBe("7000000");
       });
     });
   });

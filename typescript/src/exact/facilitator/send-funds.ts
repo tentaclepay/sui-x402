@@ -36,7 +36,7 @@ export function validateSendFundsTransaction(
   const sponsor = requirements.extra?.gasOwner as SuiAddress;
   if (!sponsor) return false;
 
-  const gasBudget = requirements.extra?.gasBudget as bigint;
+  const gasBudget = requirements.extra?.gasBudget as string;
   if (
     !gasBudget ||
     !transactionData.gasData.budget ||

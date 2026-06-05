@@ -8,7 +8,7 @@ export type ClientSuiSigner = {
 
 export type FacilitatorSuiSigner = {
   getAddresses(): readonly SuiAddress[];
-  getGasBudget(): bigint;
+  getGasBudget(): string;
   signTransaction(bytes: string): Promise<string>;
 };
 
@@ -21,6 +21,7 @@ export function toFacilitatorSuiSigner(
   return {
     ...signer,
     getAddresses: () => [signer.address],
-    getGasBudget: () => BigInt(signer.gasBudget ?? DEFAULT_GAS_BUDGET),
+    getGasBudget: () =>
+      BigInt(signer.gasBudget ?? DEFAULT_GAS_BUDGET).toString(),
   };
 }
