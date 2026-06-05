@@ -106,24 +106,27 @@ export class ExactSuiScheme implements SchemeNetworkClient {
     });
 
     if (!isGasless(resolvedAsset, resolvedAmount, network)) {
-      transaction.setGasBudget(gasBudget);
-
       const [{ systemState }, { chainIdentifier }] = await Promise.all([
         client.core.getCurrentSystemState(),
         client.core.getChainIdentifier(),
       ]);
 
+      const epoch = Number(systemState.epoch);
+
       // Have to set expiration manually if using setGasBudget
       transaction.setExpiration({
         ValidDuring: {
           chain: chainIdentifier,
-          minEpoch: Number(systemState.epoch),
-          maxEpoch: Number(systemState.epoch) + 1,
+          minEpoch: epoch,
+          maxEpoch: epoch + 1,
           minTimestamp: null,
           maxTimestamp: null,
           nonce: (Math.random() * 0x100000000) >>> 0,
         },
       });
+
+      transaction.setGasBudget(gasBudget);
+      transaction.setGasPrice(systemState.referenceGasPrice);
     }
 
     transaction.setGasOwner(gasOwner);
