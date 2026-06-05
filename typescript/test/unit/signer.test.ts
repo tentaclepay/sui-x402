@@ -94,37 +94,31 @@ describe("Sui Signer", () => {
       });
 
       it("should accept a bigint budget", () => {
-        const facilitator = toFacilitatorSuiSigner(
-          {
-            address: "0xabc123" as `0x${string}`,
-            signTransaction: vi.fn() as never,
-          },
-          5_000_000n
-        );
+        const facilitator = toFacilitatorSuiSigner({
+          address: "0xabc123" as `0x${string}`,
+          gasBudget: 5_000_000n,
+          signTransaction: vi.fn() as never,
+        });
 
         expect(facilitator.getGasBudget()).toBe(5_000_000n);
       });
 
       it("should coerce a number budget to bigint", () => {
-        const facilitator = toFacilitatorSuiSigner(
-          {
-            address: "0xabc123" as `0x${string}`,
-            signTransaction: vi.fn() as never,
-          },
-          3_000_000
-        );
+        const facilitator = toFacilitatorSuiSigner({
+          address: "0xabc123" as `0x${string}`,
+          gasBudget: 3_000_000,
+          signTransaction: vi.fn() as never,
+        });
 
         expect(facilitator.getGasBudget()).toBe(3_000_000n);
       });
 
       it("should coerce a string budget to bigint", () => {
-        const facilitator = toFacilitatorSuiSigner(
-          {
-            address: "0xabc123" as `0x${string}`,
-            signTransaction: vi.fn() as never,
-          },
-          "7000000"
-        );
+        const facilitator = toFacilitatorSuiSigner({
+          address: "0xabc123" as `0x${string}`,
+          gasBudget: "7000000",
+          signTransaction: vi.fn() as never,
+        });
 
         expect(facilitator.getGasBudget()).toBe(7_000_000n);
       });

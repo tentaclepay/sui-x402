@@ -21,6 +21,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import type { ClientSuiSigner, FacilitatorSuiSigner } from "../../src/signer";
 import type { SuiAddress } from "../../src/types";
 import {
+  DEFAULT_GAS_BUDGET,
   SUI_TESTNET_CAIP2,
   SUI_TESTNET_GRPC_URL,
   USDC_TESTNET_COIN_TYPE,
@@ -67,6 +68,7 @@ function toFacilitatorSuiSignerFromKeypair(
   const address = keypair.toSuiAddress() as SuiAddress;
   return {
     getAddresses: () => [address],
+    getGasBudget: () => DEFAULT_GAS_BUDGET,
     signTransaction: async (base64Bytes: string): Promise<string> => {
       const { signature } = await keypair.signTransaction(
         fromBase64(base64Bytes)
