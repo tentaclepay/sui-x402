@@ -8,6 +8,7 @@ import {
 } from "@mysten/sui/utils";
 
 import type { SuiAddress } from "../../types";
+import { isGasless } from "../../utils";
 
 const SUI_FRAMEWORK = normalizeSuiAddress("0x2");
 
@@ -33,20 +34,35 @@ export function validateSendFundsTransaction(
   )
     return false;
 
-  const sponsor = requirements.extra?.gasOwner as SuiAddress;
-  if (!sponsor) return false;
+  if (isGasless(expectedAsset, expectedAmount, requirements.network)) {
+    if (
+      !transactionData.gasData.budget ||
+      BigInt(transactionData.gasData.budget) !== 0n
+    )
+      return false;
 
-  const gasBudget = requirements.extra?.gasBudget as string;
-  if (
-    !gasBudget ||
-    !transactionData.gasData.budget ||
-    BigInt(transactionData.gasData.budget) > BigInt(gasBudget)
-  )
-    return false;
+    if (
+      !transactionData.gasData.price ||
+      BigInt(transactionData.gasData.price) !== 0n
+    )
+      return false;
+  } else {
+    const gasBudget = requirements.extra?.gasBudget as string;
+
+    if (
+      !gasBudget ||
+      !transactionData.gasData.budget ||
+      BigInt(transactionData.gasData.budget) !== BigInt(gasBudget)
+    )
+      return false;
+  }
+
+  const gasOwner = requirements.extra?.gasOwner as SuiAddress;
+  if (!gasOwner) return false;
 
   const isValidGasOwner =
     normalizeSuiAddress(transactionData.gasData.owner) ===
-    normalizeSuiAddress(sponsor);
+    normalizeSuiAddress(gasOwner);
   if (!isValidGasOwner) return false;
 
   const sendFunds = findSendFundsCommand(transactionData.commands);

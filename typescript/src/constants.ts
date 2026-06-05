@@ -33,18 +33,36 @@ export const USDC_TESTNET_COIN_TYPE =
   "0xa1ec7fc00a6f40db9693ad1415d0c193ad3906494428cf252621037bd7117e29::usdc::USDC" as const; // Default stablecoin
 
 /**
- * Token lists
+ * Gasless token lists
  */
-export const MAINNET_TOKEN_LIST = [
-  USDC_MAINNET_COIN_TYPE,
-  USDSUI_MAINNET_COIN_TYPE,
-  SUI_USDE_MAINNET_COIN_TYPE,
-  USDY_MAINNET_COIN_TYPE,
-  FDUSD_MAINNET_COIN_TYPE,
-  AUSD_MAINNET_COIN_TYPE,
-  USDB_MAINNET_COIN_TYPE,
-] as const;
-export const TESTNET_TOKEN_LIST = [USDC_TESTNET_COIN_TYPE] as const;
+export const MAINNET_GASLESS_TOKEN_RULES = {
+  [USDC_MAINNET_COIN_TYPE]: {
+    minAmount: 10_000n,
+  },
+  [USDSUI_MAINNET_COIN_TYPE]: {
+    minAmount: 10_000n,
+  },
+  [SUI_USDE_MAINNET_COIN_TYPE]: {
+    minAmount: 10_000n,
+  },
+  [USDY_MAINNET_COIN_TYPE]: {
+    minAmount: 10_000n,
+  },
+  [FDUSD_MAINNET_COIN_TYPE]: {
+    minAmount: 10_000n,
+  },
+  [AUSD_MAINNET_COIN_TYPE]: {
+    minAmount: 10_000n,
+  },
+  [USDB_MAINNET_COIN_TYPE]: {
+    minAmount: 10_000n,
+  },
+} as const;
+export const TESTNET_GASLESS_TOKEN_RULES = {
+  [USDC_TESTNET_COIN_TYPE]: {
+    minAmount: 0n,
+  },
+} as const;
 
 /**
  * Token decimals

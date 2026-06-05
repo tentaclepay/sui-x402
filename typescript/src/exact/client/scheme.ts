@@ -4,14 +4,18 @@ import type {
   SchemeNetworkClient,
 } from "@x402/core/types";
 import { Transaction } from "@mysten/sui/transactions";
-import { isValidSuiAddress, toBase64 } from "@mysten/sui/utils";
+import {
+  isValidSuiAddress,
+  normalizeStructTag,
+  toBase64,
+} from "@mysten/sui/utils";
 import { PaymentRequirementsV2Schema } from "@x402/core/schemas";
 
 import type { SuiClientRegistry } from "../../client-registry";
 import type { ClientSuiSigner } from "../../signer";
 import type { ExactSuiPayload, SuiAddress } from "../../types";
 import { createSuiClientRegistry } from "../../client-registry";
-import { isValidNetwork } from "../../utils";
+import { isGasless, isValidNetwork } from "../../utils";
 
 export type ExactSuiSchemeOptions = {
   clientRegistry?: SuiClientRegistry;
@@ -84,22 +88,30 @@ export class ExactSuiScheme implements SchemeNetworkClient {
 
     const transaction = new Transaction();
 
+    const resolvedAsset = normalizeStructTag(asset);
     const resolvedAmount = BigInt(amount);
 
     transaction.setSender(this.signer.address);
     transaction.moveCall({
       target: "0x2::balance::send_funds",
-      typeArguments: [asset],
+      typeArguments: [resolvedAsset],
       arguments: [
         transaction.balance({
-          type: asset,
+          type: resolvedAsset,
           balance: resolvedAmount,
           useGasCoin: false,
         }),
         transaction.pure.address(payTo),
       ],
     });
-    transaction.setGasBudget(gasBudget);
+
+    if (isGasless(resolvedAsset, resolvedAmount, network)) {
+      transaction.setGasBudget(0n);
+      transaction.setGasPrice(0n);
+    } else {
+      transaction.setGasBudget(gasBudget);
+    }
+
     transaction.setGasOwner(gasOwner);
     transaction.setGasPayment([]);
 
