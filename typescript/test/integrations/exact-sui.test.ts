@@ -68,7 +68,7 @@ function toFacilitatorSuiSignerFromKeypair(
   const address = keypair.toSuiAddress() as SuiAddress;
   return {
     getAddresses: () => [address],
-    getGasBudget: () => DEFAULT_GAS_BUDGET,
+    getGasBudget: () => DEFAULT_GAS_BUDGET.toString(),
     signTransaction: async (base64Bytes: string): Promise<string> => {
       const { signature } = await keypair.signTransaction(
         fromBase64(base64Bytes)
@@ -134,6 +134,7 @@ describe("Sui Integration Tests", () => {
     let server: x402ResourceServer;
     let clientAddress: string;
     let gasOwner: string;
+    let gasBudget: string;
 
     beforeEach(async () => {
       const clientKeypair = Ed25519Keypair.fromSecretKey(
@@ -150,7 +151,9 @@ describe("Sui Integration Tests", () => {
       );
       const facilitatorSigner =
         toFacilitatorSuiSignerFromKeypair(facilitatorKeypair);
-      gasOwner = facilitatorKeypair.toSuiAddress();
+      const [_gasOwner] = facilitatorSigner.getAddresses();
+      gasOwner = _gasOwner;
+      gasBudget = facilitatorSigner.getGasBudget();
 
       const suiFacilitator = new ExactSuiFacilitator(facilitatorSigner);
       const facilitator = new x402Facilitator().register(
@@ -170,7 +173,7 @@ describe("Sui Integration Tests", () => {
           RESOURCE_SERVER_ADDRESS as string,
           "1000",
           SUI_TESTNET_CAIP2,
-          { gasOwner }
+          { gasOwner, gasBudget }
         ),
       ];
       const resource = {

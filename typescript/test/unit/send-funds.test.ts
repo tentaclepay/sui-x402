@@ -18,18 +18,24 @@ const GAS_OWNER =
 // `gasOwner` (separate from the sender) with no gas payment objects attached
 // — the facilitator fills those in later. Using `tx.withdrawal()` lets us
 // build offline without a real SuiClient.
+//
+// Defaults mirror the gasless path the client scheme produces for gasless
+// tokens (USDC mainnet at amounts >= minAmount): both the gas budget and gas
+// price are 0. Pass an explicit `gasBudget`/`gasPrice` to build a sponsored
+// (non-gasless) transaction.
 function buildSendFundsTransaction(
   asset: string,
   amount: bigint,
   payTo: string,
   gasOwner: string = GAS_OWNER,
-  gasBudget: number | bigint = 10_000_000
+  gasBudget: number | bigint = 0n,
+  gasPrice: number | bigint = 0n
 ): Transaction {
   const tx = new Transaction();
   tx.setSender(SENDER);
   tx.setGasOwner(gasOwner);
   tx.setGasPayment([]);
-  tx.setGasPrice(1000);
+  tx.setGasPrice(gasPrice);
   tx.setGasBudget(gasBudget);
   tx.setExpiration({ Epoch: 0 });
 
@@ -58,7 +64,9 @@ describe("validateSendFundsTransaction", () => {
     amount: "1000000",
     payTo: PAY_TO,
     maxTimeoutSeconds: 3600,
-    // Default tx budget produced by the helper is 10_000_000.
+    // USDC mainnet at 1_000_000 is gasless, so the helper's default gas data
+    // (budget 0, price 0) matches; gasBudget here only applies to the
+    // non-gasless path exercised by some cases below.
     extra: { gasOwner: GAS_OWNER, gasBudget: 10_000_000n },
   };
 
@@ -154,8 +162,9 @@ describe("validateSendFundsTransaction", () => {
     tx.setSender(SENDER);
     tx.setGasOwner(GAS_OWNER);
     tx.setGasPayment([]);
-    tx.setGasPrice(1000);
-    tx.setGasBudget(10_000_000);
+    // Gasless gas data so validation reaches the missing-command check.
+    tx.setGasPrice(0n);
+    tx.setGasBudget(0n);
     tx.setExpiration({ Epoch: 0 });
 
     const bytes = await tx.build();
@@ -163,17 +172,22 @@ describe("validateSendFundsTransaction", () => {
     expect(validateSendFundsTransaction(bytes, baseRequirements)).toBe(false);
   });
 
-  describe("gas budget validation", () => {
+  describe("gas budget validation (non-gasless)", () => {
+    // USDC mainnet below the gasless minAmount (10_000n) takes the sponsored
+    // path, where the tx gas budget must exactly match the budget the
+    // facilitator advertised in requirements.extra.
+    const NON_GASLESS_AMOUNT = 5_000n;
     const GAS_BUDGET = 10_000_000n;
     const requirementsWithBudget: PaymentRequirements = {
       ...baseRequirements,
+      amount: NON_GASLESS_AMOUNT.toString(),
       extra: { gasOwner: GAS_OWNER, gasBudget: GAS_BUDGET },
     };
 
     it("should validate when the transaction gas budget equals the allowed budget", async () => {
       const tx = buildSendFundsTransaction(
         USDC_MAINNET_COIN_TYPE,
-        1_000_000n,
+        NON_GASLESS_AMOUNT,
         PAY_TO,
         GAS_OWNER,
         GAS_BUDGET
@@ -185,10 +199,10 @@ describe("validateSendFundsTransaction", () => {
       );
     });
 
-    it("should validate when the transaction gas budget is below the allowed budget", async () => {
+    it("should reject when the transaction gas budget is below the allowed budget", async () => {
       const tx = buildSendFundsTransaction(
         USDC_MAINNET_COIN_TYPE,
-        1_000_000n,
+        NON_GASLESS_AMOUNT,
         PAY_TO,
         GAS_OWNER,
         5_000_000n
@@ -196,14 +210,14 @@ describe("validateSendFundsTransaction", () => {
       const bytes = await tx.build();
 
       expect(validateSendFundsTransaction(bytes, requirementsWithBudget)).toBe(
-        true
+        false
       );
     });
 
     it("should reject when the transaction gas budget exceeds the allowed budget", async () => {
       const tx = buildSendFundsTransaction(
         USDC_MAINNET_COIN_TYPE,
-        1_000_000n,
+        NON_GASLESS_AMOUNT,
         PAY_TO,
         GAS_OWNER,
         50_000_000n
@@ -218,12 +232,14 @@ describe("validateSendFundsTransaction", () => {
     it("should reject when gasBudget is missing from requirements.extra", async () => {
       const tx = buildSendFundsTransaction(
         USDC_MAINNET_COIN_TYPE,
-        1_000_000n,
-        PAY_TO
+        NON_GASLESS_AMOUNT,
+        PAY_TO,
+        GAS_OWNER,
+        GAS_BUDGET
       );
       const bytes = await tx.build();
       const requirementsWithoutBudget: PaymentRequirements = {
-        ...baseRequirements,
+        ...requirementsWithBudget,
         extra: { gasOwner: GAS_OWNER },
       };
 
@@ -238,8 +254,9 @@ describe("validateSendFundsTransaction", () => {
     tx.setSender(SENDER);
     tx.setGasOwner(GAS_OWNER);
     tx.setGasPayment([]);
-    tx.setGasPrice(1000);
-    tx.setGasBudget(10_000_000);
+    // Gasless gas data so validation reaches the send_funds package check.
+    tx.setGasPrice(0n);
+    tx.setGasBudget(0n);
     tx.setExpiration({ Epoch: 0 });
 
     const withdrawal = tx.withdrawal({

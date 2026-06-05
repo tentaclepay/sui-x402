@@ -105,10 +105,7 @@ export class ExactSuiScheme implements SchemeNetworkClient {
       ],
     });
 
-    if (isGasless(resolvedAsset, resolvedAmount, network)) {
-      transaction.setGasBudget(0n);
-      transaction.setGasPrice(0n);
-    } else {
+    if (!isGasless(resolvedAsset, resolvedAmount, network)) {
       transaction.setGasBudget(gasBudget);
     }
 

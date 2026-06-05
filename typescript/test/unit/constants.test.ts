@@ -4,7 +4,7 @@ import {
   AUSD_MAINNET_COIN_TYPE,
   DEFAULT_GAS_BUDGET,
   FDUSD_MAINNET_COIN_TYPE,
-  MAINNET_TOKEN_LIST,
+  MAINNET_GASLESS_TOKEN_RULES,
   SUI_DEVNET_CAIP2,
   SUI_DEVNET_GRPC_URL,
   SUI_MAINNET_CAIP2,
@@ -13,7 +13,7 @@ import {
   SUI_TESTNET_CAIP2,
   SUI_TESTNET_GRPC_URL,
   SUI_USDE_MAINNET_COIN_TYPE,
-  TESTNET_TOKEN_LIST,
+  TESTNET_GASLESS_TOKEN_RULES,
   USDB_MAINNET_COIN_TYPE,
   USDC_DECIMAL,
   USDC_MAINNET_COIN_TYPE,
@@ -108,23 +108,37 @@ describe("Sui Constants", () => {
     });
   });
 
-  describe("Token lists", () => {
-    it("should include USDC in mainnet token list", () => {
-      expect(MAINNET_TOKEN_LIST).toContain(USDC_MAINNET_COIN_TYPE);
+  describe("Gasless token rules", () => {
+    it("should include USDC in mainnet gasless token rules", () => {
+      expect(Object.keys(MAINNET_GASLESS_TOKEN_RULES)).toContain(
+        USDC_MAINNET_COIN_TYPE
+      );
     });
 
-    it("should list all mainnet tokens", () => {
-      expect(MAINNET_TOKEN_LIST).toContain(USDC_MAINNET_COIN_TYPE);
-      expect(MAINNET_TOKEN_LIST).toContain(USDSUI_MAINNET_COIN_TYPE);
-      expect(MAINNET_TOKEN_LIST).toContain(SUI_USDE_MAINNET_COIN_TYPE);
-      expect(MAINNET_TOKEN_LIST).toContain(USDY_MAINNET_COIN_TYPE);
-      expect(MAINNET_TOKEN_LIST).toContain(FDUSD_MAINNET_COIN_TYPE);
-      expect(MAINNET_TOKEN_LIST).toContain(AUSD_MAINNET_COIN_TYPE);
-      expect(MAINNET_TOKEN_LIST).toContain(USDB_MAINNET_COIN_TYPE);
+    it("should list all mainnet gasless tokens", () => {
+      const mainnetTokens = Object.keys(MAINNET_GASLESS_TOKEN_RULES);
+      expect(mainnetTokens).toContain(USDC_MAINNET_COIN_TYPE);
+      expect(mainnetTokens).toContain(USDSUI_MAINNET_COIN_TYPE);
+      expect(mainnetTokens).toContain(SUI_USDE_MAINNET_COIN_TYPE);
+      expect(mainnetTokens).toContain(USDY_MAINNET_COIN_TYPE);
+      expect(mainnetTokens).toContain(FDUSD_MAINNET_COIN_TYPE);
+      expect(mainnetTokens).toContain(AUSD_MAINNET_COIN_TYPE);
+      expect(mainnetTokens).toContain(USDB_MAINNET_COIN_TYPE);
     });
 
-    it("should include USDC in testnet token list", () => {
-      expect(TESTNET_TOKEN_LIST).toContain(USDC_TESTNET_COIN_TYPE);
+    it("should include USDC in testnet gasless token rules", () => {
+      expect(Object.keys(TESTNET_GASLESS_TOKEN_RULES)).toContain(
+        USDC_TESTNET_COIN_TYPE
+      );
+    });
+
+    it("should define a bigint minAmount for every gasless token rule", () => {
+      for (const rule of Object.values(MAINNET_GASLESS_TOKEN_RULES)) {
+        expect(typeof rule.minAmount).toBe("bigint");
+      }
+      for (const rule of Object.values(TESTNET_GASLESS_TOKEN_RULES)) {
+        expect(typeof rule.minAmount).toBe("bigint");
+      }
     });
   });
 
